@@ -21,15 +21,33 @@ maintainer:         tomdwy1008@gmail.com
 -- category:
 extra-source-files: CHANGELOG.md
 
-executable dunai-gui-virt
-    main-is:          Main.hs
-    other-modules: FRP.GUI.Widgets
+library
+    -- main-is:          Main.hs
+    -- other-modules: FRP.Dynamic
+    --              , FRP.GUI.Widgets
+    exposed-modules: Main
+                   , FRP.Dynamic
+                   , FRP.GUI.Widgets
 
     -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
+    default-extensions: DeriveFunctor
+                      , Arrows
     build-depends:    base ^>=4.16.4.0
                     , bearriver
                     , dunai
 
     hs-source-dirs:   app
-    default-language: Haskell2010
+    default-language: GHC2021
+
+test-suite dynamic
+    type: exitcode-stdio-1.0
+    main-is: DynamicTest.hs
+    default-language: GHC2021
+    default-extensions: DeriveFunctor
+                      , Arrows
+    hs-source-dirs: tests
+    build-depends: base
+                 , dunai-gui-virt
+                 , dunai-test
+                 , QuickCheck
+                 , bearriver
