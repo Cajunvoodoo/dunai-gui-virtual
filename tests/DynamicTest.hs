@@ -10,14 +10,24 @@ import FRP.BearRiver
 import Test.QuickCheck
 
 
-holdDynUpdate :: Monad m => Int -> TPred (ClockInfo m) (Event Int)
-holdDynUpdate i = Always $ Prop
+holdDynCurrent :: Monad m => Int -> TPred (ClockInfo m) (Event Int)
+holdDynCurrent i = Always $ Prop
   (
     proc ev -> do
       (newDyn, oldDyn) <- holdDynPair i -< ev
       case ev of
         Event new -> returnA -< current newDyn == new
         NoEvent   -> returnA -< current newDyn == current oldDyn
+  )
+
+holdDynEvent :: Monad m => Int -> TPred (ClockInfo m) (Event Int)
+holdDynEvent i = Always $ Prop
+  (
+    proc ev -> do
+      (newDyn, oldDyn) <- holdDynPair i -< ev
+      case ev of
+        Event new -> returnA -< updated newDyn == ev
+        NoEvent   -> returnA -< updated newDyn == NoEvent
   )
 
 -- | Same as @holdDyn@, but holds the current and last value
@@ -30,9 +40,13 @@ holdDynPair a = loopPre (Dynamic NoEvent a) loopHold
       returnA -< ((newDyn, oldDyn), newDyn)
 
 
-prop_HoldDyn :: Property
-prop_HoldDyn =
-  forAll uniDistStream $ evalT @Maybe (holdDynUpdate 1)
+prop_HoldDynCurrent :: Property
+prop_HoldDynCurrent =
+  forAll uniDistStream $ evalT @Maybe (holdDynCurrent 1)
+
+prop_HoldDynEvent :: Property
+prop_HoldDynEvent =
+  forAll uniDistStream $ evalT @Maybe (holdDynEvent 1)
 
 -- Orphan ):
 instance Arbitrary a => Arbitrary (Event a) where
