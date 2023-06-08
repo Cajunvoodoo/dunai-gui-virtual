@@ -4,7 +4,6 @@ import FRP.BearRiver
 import Data.Kind (Type)
 
 class Widget w where
-
   -- | The signals the widget can accept
   -- FIXME: markdown in haddock comments
   -- Ex. a textbox may accept Append, Delete, Clear, etc
@@ -16,7 +15,7 @@ class Widget w where
   -- change and the whole state.
   -- FIXME: markdown in haddock comments
   -- Ex. a textbox may output a @Dynamic@ containing its
-  -- most recent addition and its current whole value
+  -- most recent addition and its current value
   data WidgetOutput w :: Type
 
 
