@@ -28,10 +28,15 @@ library
     exposed-modules: Main
                    , FRP.Dynamic
                    , FRP.GUI.Widgets
+                   , FRP.GUI.Renderable
+                   , FRP.GUI.State
 
     -- LANGUAGE extensions used by modules in this package.
     default-extensions: DeriveFunctor
                       , Arrows
+                      , TypeFamilies
+                      , DataKinds
+                      , AllowAmbiguousTypes
     build-depends:    base ^>=4.16.4.0
                     , bearriver
                     , dunai
@@ -42,12 +47,13 @@ library
 test-suite dynamic
     type: exitcode-stdio-1.0
     main-is: DynamicTest.hs
-    default-language: GHC2021
     default-extensions: DeriveFunctor
                       , Arrows
+                      , TypeFamilies
     hs-source-dirs: tests
     build-depends: base
                  , dunai-gui-virt
                  , dunai-test
                  , QuickCheck
                  , bearriver
+    default-language: GHC2021
