@@ -30,6 +30,7 @@ library
                    , FRP.GUI.Widgets
                    , FRP.GUI.Renderable
                    , FRP.GUI.State
+                   , FRP.GUI.AddHandler
 
     -- LANGUAGE extensions used by modules in this package.
     default-extensions: DeriveFunctor
@@ -37,9 +38,19 @@ library
                       , TypeFamilies
                       , DataKinds
                       , AllowAmbiguousTypes
+                      , RecursiveDo
+                      , OverloadedLabels
+                      , OverloadedStrings
+
     build-depends:    base ^>=4.16.4.0
                     , bearriver
                     , dunai
+                    , mtl
+                    , containers
+                    , gi-gtk
+                    , gi-gio
+                    , haskell-gi-base
+                    , text
 
     hs-source-dirs:   app
     default-language: GHC2021

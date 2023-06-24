@@ -26,6 +26,17 @@ holdDyn a = proc ev -> do
         Event new -> returnA -< (Dynamic newEv new, new)
         NoEvent   -> returnA -< (Dynamic NoEvent old, old)
 
+-- TODO: add to test suite
+holdDynOn :: forall m a. (Monad m) => a -> (a -> a -> Bool) -> SF m (Event a) (Dynamic a)
+holdDynOn a f = proc ev -> do
+  loopPre a loopHold -< ev
+  where
+    loopHold :: SF m (Event a, a) (Dynamic a, a)
+    loopHold = proc (newEv, old) -> do
+      case newEv of
+        Event new | f new old -> returnA -< (Dynamic newEv new, new)
+        _ ->                     returnA -< (Dynamic NoEvent old, old)
+
 -- | Like @holdDyn@, but the value in the @Dynamic@ never changes.
 constDyn :: Monad m => a -> SF m () (Dynamic a)
 constDyn a = pure $ Dynamic NoEvent a

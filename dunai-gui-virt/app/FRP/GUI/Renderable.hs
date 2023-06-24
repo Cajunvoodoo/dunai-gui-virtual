@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
 -- | TODO: summary of Renderable module
 
 module FRP.GUI.Renderable where
