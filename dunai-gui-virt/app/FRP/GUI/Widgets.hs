@@ -5,7 +5,7 @@ import FRP.BearRiver
 import Data.Kind (Type)
 import Control.Monad.Reader (ReaderT, MonadTrans (lift), MonadReader (..), asks)
 
-import GI.Gtk (new, ManagedPtr, Button (Button), AttrOp (..), on, IsBuilder, GObject, builderGetObject, unsafeCastTo)
+import GI.Gtk (new, ManagedPtr, Button (Button), AttrOp (..), on, IsBuilder, GObject, builderGetObject, unsafeCastTo, set)
 import Data.GI.Base.Attributes
     ( AttrOp, AttrOpTag(AttrConstruct) )
 import Data.GI.Base.BasicTypes ( ManagedPtr )
@@ -28,6 +28,7 @@ import GHC.TypeLits (KnownSymbol)
 import GI.Gtk (get)
 import Data.Unique
 import FRP.Dynamic
+import Data.GI.Base.Overloading
 
 -- class Widget w where
 --   -- | The signals the widget can accept
@@ -58,7 +59,7 @@ newtype BuilderCastException = UnknownIdException String
 instance Exception BuilderCastException
 
 castB
-  :: (IsBuilder a, GObject o, MonadIO m, Exception (String -> BuilderCastException))
+  :: (IsBuilder a, GObject o, MonadIO m)
   => a
   -> Text
   -> (ManagedPtr o -> o)
@@ -68,7 +69,18 @@ castB builder ident gtype =
     o <- builderGetObject builder ident
     case o of
       Just a -> unsafeCastTo gtype a
-      Nothing -> throw UnknownIdException $ T.unpack ident
+      Nothing -> throw $ UnknownIdException $ T.unpack ident
+
+-- | Cast from a builder object using @castB@. Only evaluates once, returning that stored result.
+castBSF
+  :: (IsBuilder builder, GObject o, MonadIO m, Exception (String -> BuilderCastException))
+  => builder
+  -> Text
+  -> (ManagedPtr o -> o)
+  -> SF m () o
+castBSF builder ident gtype = performOnFirstSample $ do
+    val <- castB builder ident gtype
+    pure $ proc _ -> returnA -< val
 
 signalAddHandler
   :: (SignalInfo info, GObject self)
@@ -119,15 +131,17 @@ signalEN
   -> ((a -> IO b) -> HaskellCallbackType info)
   -> b
   -> SF m () (Event a)
-signalEN self signal f b = proc _ -> do
-  evAndUniq <- signalEN' self signal f b -< ()
-  heldUniq <-
-    holdDynOn
-      (undefined, -1)
-      (\(_, uniq) (_, oldUniq) -> uniq /= oldUniq)
-    -< fmap (fmap hashUnique) evAndUniq
-  let x = fmap fst heldUniq
-  returnA -< updated x
+signalEN self signal f b = performOnFirstSample $ do
+  dummyUnique <- liftIO newUnique
+  pure $ proc _ -> do
+    evAndUniq <- signalEN' self signal f b -< ()
+    heldUniq <-
+      holdDynOn
+        (undefined, dummyUnique) --placeholder and sentinel value
+        (\(_, uniq) (_, oldUniq) -> uniq /= oldUniq)
+      -< evAndUniq
+    let x = fmap fst heldUniq
+    returnA -< updated x
 
 -- | Get an 'Reactive.Banana.Event' from
 -- a 'Data.GI.Base.Signals.SignalProxy' that produces nothing.
@@ -205,8 +219,38 @@ attrD self attr = performOnFirstSample $ do
     ev <- attrE self attr -< ()
     holdDyn initValue -< ev --update the dynamic with the new value
 
--- >>> :t arr holdDyn
--- arr holdDyn :: (Arrow a, Monad m) => a b (SF m (Event b) (Dynamic b))
+data AttrOpSF self tag m inp where
+  (:->)
+    :: ( HasAttributeList self
+       , info ~ ResolveAttribute attr self 
+       , AttrInfo info
+       , AttrBaseTypeConstraint info self
+       , AttrOpAllowed tag info self
+       , AttrSetTypeConstraint info b 
+       , MonadIO m
+       )
+    => AttrLabelProxy (attr :: Symbol)
+    -> SF m a b
+    -> AttrOpSF self tag m a
+infixr 0 :->
+
+-- | Change an attribute of a widget using a SF
+-- Example usage:
+-- @
+-- myLabel
+-- sink myLabel
+sink 
+  :: ( GObject self
+     , MonadIO m
+     )
+  => self 
+  -> AttrOpSF self AttrSet m a 
+  -> SF m a ()
+sink self (attr :-> sf) = proc a -> do
+  sfOut <- sf -< a
+  -- TODO: see if setting without diffing in sink1 causes 
+  -- unnecessary recomputation
+  arrM (\x -> set self [attr := x]) -< sfOut
 
 ------------------------------
 -- BASIC HELLO WORLD IN GTK --
@@ -218,23 +262,28 @@ printHello = putStrLn "Hello, World!"
 
 activateApp :: Gtk.Application -> IO ()
 activateApp app = do
-  w <- new Gtk.ApplicationWindow [ #application := app
-                                 , #title := "Haskell Gi - Examples - Hello World"
-                                 , #defaultHeight := 200
-                                 , #defaultWidth := 200
-                                 ]
+  w <- new Gtk.Window [ #application := app
+                      , #title := "Haskell Gi - Examples - Hello World"
+                      , #defaultHeight := 200
+                      , #defaultWidth := 200
+                      ]
+  Gtk.applicationAddWindow app w
 
-  bbox <- new Gtk.ButtonBox [ #orientation := Gtk.OrientationHorizontal ]
-  #add w bbox
+  bbox <- new Gtk.Box [ #orientation := Gtk.OrientationHorizontal ]
+  Gtk.setWindowChild w bbox
+  -- #add w bbox
 
   btn <- new Gtk.Button [ #label := "Hello World!"]
   on btn #clicked printHello
-  on btn #clicked $ Gtk.widgetDestroy w
-  #add bbox btn
+  on btn #clicked $ Gtk.windowDestroy w
+  #append bbox btn
 
-  #showAll w
-  print "test"
+  Gtk.widgetSetVisible w True
   return ()
+
+--how does actuate work in reactive banana? does it spawn another thread?
+--how should i generate new widgets defined outside of the GUI builder on another thread?
+-- ^ add idle in glib
 
 main :: IO ()
 main = do

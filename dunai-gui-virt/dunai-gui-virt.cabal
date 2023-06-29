@@ -47,7 +47,8 @@ library
                     , dunai
                     , mtl
                     , containers
-                    , gi-gtk
+                    , gi-gtk >= 4.0.1
+                    , gi-glib > 2.0.23 || < 2.0.0
                     , gi-gio
                     , haskell-gi-base
                     , text
