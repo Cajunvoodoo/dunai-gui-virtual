@@ -50,8 +50,11 @@ library
                     , gi-gtk >= 4.0.1
                     , gi-glib > 2.0.23 || < 2.0.0
                     , gi-gio
+                    , gi-gdk
                     , haskell-gi-base
                     , text
+
+    -- ghc-options: -O2
 
     hs-source-dirs:   app
     default-language: GHC2021

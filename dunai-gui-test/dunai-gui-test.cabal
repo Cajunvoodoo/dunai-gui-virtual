@@ -51,6 +51,10 @@ executable dunai-gui-test
     -- Other library packages from which modules are imported.
     build-depends:    base ^>=4.16.4.0
                     , dunai-gui-virt
+                    , dear-imgui
+                    , sdl2
+                    , OpenGLRaw
+                    , managed
     -- Directories containing source files.
     hs-source-dirs:   app
     -- Base language which the package is written in.

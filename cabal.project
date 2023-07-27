@@ -1,3 +1,6 @@
 packages:
   dunai-gui-virt/
   dunai-gui-test/
+
+package dear-imgui
+  flags: +vulkan
