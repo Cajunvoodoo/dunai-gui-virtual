@@ -9,7 +9,7 @@
 {-# language LambdaCase #-}
 {-# language OverloadedStrings #-}
 
-module Main ( main ) where
+module Main where
 
 import Control.Exception
 import Control.Monad.IO.Class
@@ -21,12 +21,16 @@ import DearImGui.SDL.OpenGL
 import Graphics.GL
 import SDL
 import Control.Concurrent (threadDelay)
+import Control.Monad (when)
+import Data.Text (Text)
+import qualified Data.Text as T
+import FRP.GUI.Widgets as W
+import Control.Monad.Free (Free, retract)
 
 main :: IO ()
 main = do
   -- Initialize SDL
   initializeAll
-
 
   runManaged do
     -- Create a window using SDL. As we're using OpenGL, we need to enable OpenGL too.
@@ -46,10 +50,13 @@ main = do
     _ <- managed_ $ bracket_ (sdl2InitForOpenGL window glContext) sdl2Shutdown
 
     -- Initialize ImGui's OpenGL backend
-    _ <- managed_ $ bracket_ (openGL3Init >> swapInterval $= SynchronizedUpdates) openGL3Shutdown
+    _ <- managed_ $ bracket_ openGL3Init openGL3Shutdown
 
-    liftIO $ mainLoop window
+    liftIO $ mainLoop' window
 
+
+mainLoop' :: Window -> IO ()
+mainLoop' window = reactimate' @IO (testWidget window)
 
 mainLoop :: Window -> IO ()
 mainLoop window = unlessQuit do
@@ -59,14 +66,24 @@ mainLoop window = unlessQuit do
   newFrame
 
   -- Build the GUI
+  setNextWindowFullscreen
   withWindowOpen "Hello, ImGui!" do
     -- Add a text widget
     text "Hello, ImGui!"
 
     -- Add a button widget, and call 'putStrLn' when it's clicked
-    button "Clickety Click" >>= \case
+    fstBtn <- button "Clickety Click" >>= \case
       False -> return ()
-      True  -> putStrLn "Ow!"
+      True  -> do
+        putStrLn "Ow!"
+        openPopup "Child window"
+        pure ()
+    withPopupModalOpen "Child window" $ do
+      text "Child window!!"
+      button "Other clicky"
+        >>= \case
+        False -> return ()
+        True  -> putStrLn "Clicked!" >> closeCurrentPopup
 
   -- Show the ImGui demo window
   showDemoWindow
@@ -98,3 +115,6 @@ mainLoop window = unlessQuit do
 
     isQuit event =
       SDL.eventPayload event == SDL.QuitEvent
+
+tshow :: Show a => a -> Text
+tshow = T.pack . show

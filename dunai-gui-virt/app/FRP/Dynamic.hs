@@ -6,9 +6,9 @@ import FRP.BearRiver
 -- | Dynamics allow for the subscription to @Events@ while tracking a current
 -- value.
 data Dynamic a = Dynamic
-    { modified :: Event a
-    , current :: a
-    } deriving (Show, Functor)
+  { modified :: Event a
+  , current  :: a
+  } deriving (Show, Functor)
 
 -- | Retrieve the current value from a @Dynamic@. Functionally identical to
 -- @modified@, but with a name that may make more sense.

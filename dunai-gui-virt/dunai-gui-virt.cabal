@@ -31,6 +31,7 @@ library
                    , FRP.GUI.Renderable
                    , FRP.GUI.State
                    , FRP.GUI.AddHandler
+                   , FRP.GUI.Utils
 
     -- LANGUAGE extensions used by modules in this package.
     default-extensions: DeriveFunctor
@@ -41,6 +42,7 @@ library
                       , RecursiveDo
                       , OverloadedLabels
                       , OverloadedStrings
+                      , DuplicateRecordFields
 
     build-depends:    base ^>=4.16.4.0
                     , bearriver
@@ -53,6 +55,13 @@ library
                     , gi-gdk
                     , haskell-gi-base
                     , text
+                    , dear-imgui
+                    , OpenGLRaw
+                    , sdl2
+                    , managed
+                    , free
+                    , Diff
+                    , StateVar
 
     -- ghc-options: -O2
 
