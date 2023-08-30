@@ -154,26 +154,24 @@ testWidget window = proc _ -> do
 
 
 -- | Make a button with a provided signal function.
--- | This corresponds similarly to the dear-imgui function @button@.
--- | @
--- | btn <- button "Clickety Click" >>= \case
--- |   False -> return ()
--- |   True  -> do
--- |     putStrLn "Ow!"
--- | @
--- | Where the supplied SF acts as the continuation based on the button output.
+--   This corresponds similarly to the dear-imgui function @button@.
+--   @
+--   btn <- button "Clickety Click" >>= \case
+--     False -> return ()
+--     True  -> do
+--       putStrLn "Ow!"
+--   @
+--   Where the supplied SF acts as the continuation based on the button output.
 mkButton :: MonadIO m => SF m Bool b -> SF m ID b
 mkButton sf = proc name -> do
   btnOut <- arrM button -< name
   sf -< btnOut
 
--- HACK:
--- FIXME:
 -- TODO: variant of @mkWindowOpen@ to enable stuff like @setNextWindowFullscreen@,
 -- which requires it to be called before calling @withWindowOpen@
 -- TODO: Instead of a tuple, have some sort of record, maybe using Data.Default?
 -- | Make a window in which widgets can be drawn in. The provided signal function
--- | draws the widgets inside of this window.
+--   draws the widgets inside of this window.
 mkWindowOpen :: MonadIO m => SF m a b -> SF m (a, ID) b
 mkWindowOpen sf = proc (a, name) -> do
   arrM begin -< name     -- BEGIN
@@ -182,18 +180,20 @@ mkWindowOpen sf = proc (a, name) -> do
   returnA -< b
 
 -- | Make a plot over time holding @n@ maximum datapoints. The signal function
--- | accepts the new datapoint and the name of the graph. When a new datapoint
--- | is received, the leftmost is pushed out for the new rightmost datapoint.
+--  accepts the new datapoint and the name of the graph. When a new datapoint
+--  is received, the leftmost is pushed out for the new rightmost datapoint.
 mkPlotLines :: MonadIO m => Int -> SF m (Float, ID) ()
 mkPlotLines len = proc (n, name) -> do
   list <- holdList len -< Event $ CFloat n
   arrM $ uncurry plotLines -< (name, list)
 
--- BIND <- SIGNAL FUNCTION -< INPUTS
--- SIGNAL FUNCTION -< INPUTS
-
-  -- label ref bufSize size
-
+-- | A text field has 4 fields:
+--      * textDyn   :: Dynamic Text
+--      * label     :: Text
+--      * fieldSize :: ImVec2
+--      * buffSize  :: Int
+--   All of which are required to properly render a text field.
+--   The buff size
 data TextField = TextField
   {
     textDyn   :: Dynamic Text
@@ -207,7 +207,7 @@ emptyTextField :: Text -> ImVec2 -> Int -> TextField
 emptyTextField = TextField (Dynamic NoEvent "")
 
 -- | Make a multiline text widget.
--- | Note: Length is constant. @dear-imgui@ does not yet support resizing buffers.
+--   Note: Length is constant. @dear-imgui@ does not yet support resizing buffers.
 mkTextMultiline :: MonadIO m => SF m TextField TextField
 mkTextMultiline = proc textField -> do
   arrM $ inputTextFieldMultiline -< textField
@@ -226,9 +226,6 @@ inputTextFieldMultiline (TextField textDyn label fieldSize buffSize) = do
   -- Get the altered text
   newText <- liftIO $ readIORef ioRef
 
-  let diff = diffText oldText newText
-  liftIO $ print diff
-  --TODO: find a way to diff the text, maybe dropping the prefix of whichever is smaller?
   pure $
     TextField
     {

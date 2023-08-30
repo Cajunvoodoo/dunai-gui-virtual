@@ -29,15 +29,17 @@ tshow = T.pack . show
 
 diffText :: Text -> Text -> Event Text
 diffText old new =
-  wrapInEvent . T.pack . fmap fromDiff $ getDiff (T.unpack old) (T.unpack new)
+  wrapInEvent . T.pack . concatMap fromDiff $ getDiff (T.unpack old) (T.unpack new)
   where
-    fromDiff :: Diff a -> a
-    fromDiff (First a)  = a
-    fromDiff (Second a) = a
-    fromDiff (Both a b) = b
+    -- Ignore any differences that are strictly in the first string,
+    -- as we consider it "static"
+    fromDiff :: Diff Char -> String
+    fromDiff (First a)  = ""
+    fromDiff (Second a) = take 1 $ drop 1 $ show a
+    fromDiff (Both a b) = ""
 
     wrapInEvent :: Text -> Event Text
     wrapInEvent text =
       case text of
-        "" -> NoEvent
+        "\0" -> NoEvent
         _  -> Event text
