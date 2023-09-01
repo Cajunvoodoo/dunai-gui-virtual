@@ -3,4 +3,4 @@ packages:
   dunai-gui-test/
 
 package dear-imgui
-  flags: +vulkan
+  flags: -vulkan +opengl3
