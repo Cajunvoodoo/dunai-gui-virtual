@@ -46,7 +46,27 @@
 
            # Programs you want to make available in the shell.
            # Default programs can be disabled by setting to 'null'
-           tools = hp: { fourmolu = hp.fourmolu; ghcid = null; fish = pkgs.fish; };
+           tools = hp: {
+             fourmolu = hp.fourmolu;
+             ghcid = null;
+
+             # Use a half-decent shell
+             fish = pkgs.fish;
+             # System dependencies
+             inherit (pkgs)
+               pkg-config
+
+               glew
+               glib
+               gtk4
+               gobject-introspection
+               atkmm
+               pcre2
+               gcc
+
+               SDL2
+             ;
+           };
 
            hlsCheck.enable = true;
           };
