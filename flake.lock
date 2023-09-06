@@ -1,0 +1,99 @@
+{
+  "nodes": {
+    "dear-imgui": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1693822210,
+        "narHash": "sha256-JRBfTCBkMJEQBMGG8kZq/nGIaMyioUnQkchVOjiJX3U=",
+        "ref": "refs/heads/main",
+        "rev": "eec8b57ce89236456ce9d79c760e6abc5d0c27a3",
+        "revCount": 154,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/haskell-game/dear-imgui.hs"
+      },
+      "original": {
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/haskell-game/dear-imgui.hs"
+      }
+    },
+    "flake-parts": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib"
+      },
+      "locked": {
+        "lastModified": 1693611461,
+        "narHash": "sha256-aPODl8vAgGQ0ZYFIRisxYG5MOGSkIczvu2Cd8Gb9+1Y=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "7f53fdb7bdc5bb237da7fefef12d099e4fd611ca",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "haskell-flake": {
+      "locked": {
+        "lastModified": 1693786046,
+        "narHash": "sha256-+s6Ss5AJBXQg1yT3CUFFz6PMfKqvzvLsS9+J5SGrWUg=",
+        "owner": "srid",
+        "repo": "haskell-flake",
+        "rev": "201721efe661961bda4af980cee8b47fa54e7665",
+        "type": "github"
+      },
+      "original": {
+        "owner": "srid",
+        "repo": "haskell-flake",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1693844670,
+        "narHash": "sha256-t69F2nBB8DNQUWHD809oJZJVE+23XBrth4QZuVd6IE0=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "3c15feef7770eb5500a4b8792623e2d6f598c9c1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-lib": {
+      "locked": {
+        "dir": "lib",
+        "lastModified": 1693471703,
+        "narHash": "sha256-0l03ZBL8P1P6z8MaSDS/MvuU8E75rVxe5eE1N6gxeTo=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "3e52e76b70d5508f3cec70b882a29199f4d1ee85",
+        "type": "github"
+      },
+      "original": {
+        "dir": "lib",
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "dear-imgui": "dear-imgui",
+        "flake-parts": "flake-parts",
+        "haskell-flake": "haskell-flake",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

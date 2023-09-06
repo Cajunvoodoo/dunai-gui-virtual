@@ -4,8 +4,12 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
 
-    dear-imgui.url = "github:haskell-game/dear-imgui.hs";
-    dear-imgui.flake = false;
+    dear-imgui = {
+      type = "git";
+      url = "https://github.com/haskell-game/dear-imgui.hs";
+      flake = false;
+      submodules = true;
+    };
   };
   outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
