@@ -17,10 +17,5 @@ provide a much nicer experience with libraries that want control over the main
 loop.
 
 # Building
-## NixOS
-Currently dear-imgui is marked as broken on nixpkgs. Until the issue is resolved,
-install without the use of nixpkgs.
-For building on NixOS without using Nix, run the following:
-`
-nix-shell -p glew fish pkg-config SDL2 glib gtk4 gobject-introspection atkmm pcre2 gcc --run "cabal build dunai-gui-virt"
-`
+## Nix
+Use `nix develop` to build the flake.
